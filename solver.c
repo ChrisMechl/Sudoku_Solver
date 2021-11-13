@@ -15,6 +15,23 @@ int main(int argc, char** argv){
         return EXIT_FAILURE;
     }
 
+    Puzzle* p = instantiatePuzzle();
+    
+    /* Fill matrix */
+    if(getPuzzle(fp, p) == -1){
+        fprintf(stderr, "Invalid sudoku file format. Not enough rows or columns\n");
+        cleanUp(fp, p);
+        return EXIT_FAILURE;
+    }
+
+    ppPuzzle(p);
+
+    cleanUp(fp, p);
+    return EXIT_SUCCESS;
+
+}
+
+Puzzle* instantiatePuzzle(){
     /* Create Puzzle */
     Puzzle* p = malloc(sizeof(Puzzle));
     int** array = malloc(sizeof(int*) * ROW);
@@ -31,23 +48,14 @@ int main(int argc, char** argv){
     for(int i = 0; i < ROW; i++){
         array[i][0] = i+1;
     }
-    
-    /* Fill matrix */
-    if(getPuzzle(fp, p) == -1){
-        fprintf(stderr, "Invalid sudoku file format. Not enough rows or columns\n");
-        fclose(fp);
-        free(array);
-        return EXIT_FAILURE;
-    }
-    
-    ppPuzzle(p);
 
-    cleanUp(fp, p);
-    return EXIT_SUCCESS;
-
+    return p;
 }
-
 void cleanUp(FILE* fp, Puzzle* p){
+    if(p == 0){
+        fclose(fp);
+        return;
+    }
     for(int i = 0; i < ROW; i++){
         free(p->array[i]);
     }

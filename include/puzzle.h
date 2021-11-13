@@ -14,6 +14,7 @@ typedef struct Puzzle{
     int remainingNums[9];
 }Puzzle;
 
+Puzzle* instantiatePuzzle();
 void cleanUp(FILE* fp, Puzzle* p);
 int getPuzzle(FILE* fp, Puzzle* p);
 void printPuzzle(Puzzle* p);
