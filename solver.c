@@ -1,12 +1,4 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <string.h>
-
-#define ROW 9
-#define COL 9
-
-int getPuzzle(FILE* fp, int** array);
+#include "include/puzzle.h"
 
 int main(int argc, char** argv){
     int pid = getpid();
