@@ -15,8 +15,12 @@ int main(int argc, char** argv){
         return EXIT_FAILURE;
     }
 
-    /* Create matrix */
+    /* Create Puzzle */
+    Puzzle* p = malloc(sizeof(Puzzle));
     int** array = malloc(sizeof(int*) * ROW);
+    p->array = array;
+    p->remaining = 0;
+    /* Create rows for array */
     for(int i = 0; i < ROW; i++){
         array[i] = malloc(sizeof(int) * COL);
         memset(array[0], 0, (ROW * sizeof(int)));
@@ -26,7 +30,7 @@ int main(int argc, char** argv){
     }
     
     /* Fill matrix */
-    if(getPuzzle(fp, array) == -1){
+    if(getPuzzle(fp, p) == -1){
         fprintf(stderr, "Invalid sudoku file format. Not enough rows or columns\n");
         fclose(fp);
         free(array);
@@ -42,13 +46,14 @@ int main(int argc, char** argv){
         }
     }
     printf("\n");
+    printf("Empty spaces %d\n", p->remaining);
     free(array);
     fclose(fp);
     return EXIT_SUCCESS;
 
 }
 
-int getPuzzle(FILE* fp, int** array){
+int getPuzzle(FILE* fp, Puzzle* p){
     char cur;
     for(int i = 0; i < ROW; i++){
         for(int j = 0; j < COL; j++){
@@ -63,11 +68,12 @@ int getPuzzle(FILE* fp, int** array){
             }
             /* If char is not between 1-9 or newline, set it to zero */
             else if(cur < 49 || cur > 57){
-                array[i][j] = 0;
+                p->array[i][j] = 0;
+                p->remaining++;
             }
             /* If char is 1-9, set the array position to it */
             else{
-                array[i][j] = cur - 48;
+                p->array[i][j] = cur - 48;
             }
         }
     }
