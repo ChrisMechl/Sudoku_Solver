@@ -19,7 +19,10 @@ int main(int argc, char** argv){
     Puzzle* p = malloc(sizeof(Puzzle));
     int** array = malloc(sizeof(int*) * ROW);
     p->array = array;
-    p->remaining = 0;
+    p->remainingNums[0] = 0;
+    for(int i = 1; i < 10; i++){
+        p->remainingNums[i] = 9;
+    }
     /* Create rows for array */
     for(int i = 0; i < ROW; i++){
         array[i] = malloc(sizeof(int) * COL);
@@ -36,10 +39,8 @@ int main(int argc, char** argv){
         free(array);
         return EXIT_FAILURE;
     }
-
-    printPuzzle(p);
-    ppPuzzle(p);
     
+    ppPuzzle(p);
 
     cleanUp(fp, p);
     return EXIT_SUCCESS;
@@ -72,11 +73,13 @@ int getPuzzle(FILE* fp, Puzzle* p){
             /* If char is not between 1-9 or newline, set it to zero */
             else if(cur < 49 || cur > 57){
                 p->array[i][j] = 0;
-                p->remaining++;
+                p->remainingNums[0]++;
             }
             /* If char is 1-9, set the array position to it */
             else{
-                p->array[i][j] = cur - 48;
+                int num = cur - 48;
+                p->array[i][j] = num;
+                p->remainingNums[num]--;
             }
         }
     }

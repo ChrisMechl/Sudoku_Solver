@@ -7,11 +7,11 @@
 #define ROW 9
 #define COL 9
 #define HORZ_BAR "-------------"
-
+#define TOTAL_REMAINING 0;
 
 typedef struct Puzzle{
     int** array;
-    int remaining;
+    int remainingNums[9];
 }Puzzle;
 
 void cleanUp(FILE* fp, Puzzle* p);
