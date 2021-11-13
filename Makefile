@@ -12,5 +12,8 @@ debug: solver.c
 run: default
 	./solver /home/christian/Documents/C_Projects/Sudoku_Solver/Tests/test1.txt
 
+valgrind: default
+	valgrind ./solver /home/christian/Documents/C_Projects/Sudoku_Solver/Tests/test1.txt
+
 clean:
 	rm solver

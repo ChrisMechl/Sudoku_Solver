@@ -13,5 +13,6 @@ typedef struct Puzzle{
 }Puzzle;
 
 int getPuzzle(FILE* fp, Puzzle* p);
+void cleanUp(FILE* fp, Puzzle* p);
 
 

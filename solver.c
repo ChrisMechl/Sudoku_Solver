@@ -47,10 +47,22 @@ int main(int argc, char** argv){
     }
     printf("\n");
     printf("Empty spaces %d\n", p->remaining);
-    free(array);
-    fclose(fp);
+    cleanUp(fp, p);
     return EXIT_SUCCESS;
 
+}
+
+void cleanUp(FILE* fp, Puzzle* p){
+    for(int i = 0; i < ROW; i++){
+        free(p->array[i]);
+        // for(int j = 0; j < COL; j++){
+        //     free(p->array[i][j]);
+        // }
+    }
+
+    free(p->array);
+    free(p);
+    fclose(fp);
 }
 
 int getPuzzle(FILE* fp, Puzzle* p){
