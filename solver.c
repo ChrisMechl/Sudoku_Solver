@@ -37,16 +37,10 @@ int main(int argc, char** argv){
         return EXIT_FAILURE;
     }
 
-    for(int i = 0; i < ROW; i++){
-        if(i != 0){
-            printf("\n");
-        }
-        for(int j = 0; j < COL; j++){
-            printf("%d", array[i][j]);
-        }
-    }
-    printf("\n");
-    printf("Empty spaces %d\n", p->remaining);
+    printPuzzle(p);
+    ppPuzzle(p);
+    
+
     cleanUp(fp, p);
     return EXIT_SUCCESS;
 
@@ -55,9 +49,6 @@ int main(int argc, char** argv){
 void cleanUp(FILE* fp, Puzzle* p){
     for(int i = 0; i < ROW; i++){
         free(p->array[i]);
-        // for(int j = 0; j < COL; j++){
-        //     free(p->array[i][j]);
-        // }
     }
 
     free(p->array);
@@ -89,4 +80,33 @@ int getPuzzle(FILE* fp, Puzzle* p){
             }
         }
     }
+}
+
+void printPuzzle(Puzzle* p){
+    for(int i = 0; i < ROW; i++){
+        printf("\n");
+        for(int j = 0; j < COL; j++){
+            printf("%d", p->array[i][j]);
+        }
+    }
+    printf("\n");
+}
+
+void ppPuzzle(Puzzle* p){
+    for(int i = 0; i < ROW; i++){
+        printf("\n");
+        if(i % 3 == 0){
+            printf("%s\n", HORZ_BAR);
+        }
+        for(int j = 0; j < COL; j++){
+            if(j % 3 == 0){
+                printf("|");
+            }
+            printf("%d", p->array[i][j]);
+            if(j == COL - 1){
+                printf("|");
+            }
+        }
+    }
+    printf("\n%s\n", HORZ_BAR);
 }
