@@ -17,8 +17,8 @@ typedef struct Puzzle{
 Puzzle* instantiatePuzzle();
 void cleanUp(FILE* fp, Puzzle* p);
 int getPuzzle(FILE* fp, Puzzle* p);
+void solve(Puzzle* p);
+short compareRow(Puzzle* p, short possibilities, int row);
+short compareCol(Puzzle* p, short possibilities, int col);
 void printPuzzle(Puzzle* p);
 void ppPuzzle(Puzzle* p);
-
-
-

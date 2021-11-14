@@ -10,10 +10,10 @@ debug: solver.c
 	$(CC) -o solver solver.c $(INCLUDE) $(DEBUGFLAGS)
 
 run: default
-	./solver /home/christian/Documents/C_Projects/Sudoku_Solver/Tests/test1.txt
+	./solver /home/christian/Documents/C_Projects/Sudoku_Solver/Puzzles/test1.txt
 
 valgrind: default
-	valgrind ./solver /home/christian/Documents/C_Projects/Sudoku_Solver/Tests/test1.txt
+	valgrind ./solver /home/christian/Documents/C_Projects/Sudoku_Solver/Puzzles/test1.txt
 
 clean:
 	rm solver
