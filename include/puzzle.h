@@ -12,6 +12,7 @@
 typedef struct Puzzle{
     int** array;
     int remainingNums[9];
+    short** possibilities;
 }Puzzle;
 
 Puzzle* instantiatePuzzle();

@@ -3,19 +3,31 @@
 Puzzle* instantiatePuzzle(){
     /* Create Puzzle */
     Puzzle* p = malloc(sizeof(Puzzle));
+
+    /* Create puzzle array */
     int** array = malloc(sizeof(int*) * COL);
-    p->array = array;
-    p->remainingNums[0] = 0;
-    for(int i = 1; i < 10; i++){
-        p->remainingNums[i] = 9;
-    }
-    /* Create rows for array */
+    /* Each column gets ROW number of ints */
     for(int i = 0; i < ROW; i++){
         array[i] = malloc(sizeof(int) * ROW);
         memset(array[i], 0, (ROW * sizeof(int)));
     }
+
+    /* Create possibilities array */
+    short** possibilities = malloc(sizeof(short* ) * ROW);
+    /* Each column gets ROW number of shorts */
     for(int i = 0; i < ROW; i++){
-        array[i][0] = i+1;
+        possibilities[i] = malloc(sizeof(short) * ROW);
+        memset(possibilities[i], 0xff, (ROW * sizeof(short)));
+    }
+
+    /* Attach to Puzzle struct */
+    p->array = array;
+    p->possibilities = possibilities;
+
+    /* Assign remaining nums to default values */
+    p->remainingNums[0] = 0;
+    for(int i = 1; i < 10; i++){
+        p->remainingNums[i] = 9;
     }
 
     return p;
@@ -28,9 +40,12 @@ void cleanUp(FILE* fp, Puzzle* p){
     }
     for(int i = 0; i < ROW; i++){
         free(p->array[i]);
+        free(p->possibilities[i]);
     }
 
+
     free(p->array);
+    free(p->possibilities);
     free(p);
     fclose(fp);
 }
@@ -64,23 +79,17 @@ int getPuzzle(FILE* fp, Puzzle* p){
 }
 
 void solve(Puzzle* p){
-    /* ROW number of char* columns */
-    short** possibilities = malloc(sizeof(short* ) * ROW);
-    /* each column gets ROW number of shorts */
-    for(int i = 0; i < ROW; i++){
-        possibilities[i] = malloc(sizeof(short) * ROW);
-        memset(possibilities[i], 0xff, (ROW * sizeof(short)));
-    }
+    
 
     for(int i = 0; i < ROW; i++){
         for(int j = 0; j < COL; j++){
             /* if a number is already there, possibilities = 0 */
             if(p->array[i][j] != 0){
-                possibilities[i][j] = 0;
+                p->possibilities[i][j] = 0;
                 continue;
             }
-            possibilities[i][j] = compareRow(p, possibilities[i][j], i);
-            possibilities[i][j] = compareCol(p, possibilities[i][j], j);
+            p->possibilities[i][j] = compareRow(p, p->possibilities[i][j], i);
+            p->possibilities[i][j] = compareCol(p, p->possibilities[i][j], j);
         }
     }
 }

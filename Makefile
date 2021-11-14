@@ -16,7 +16,7 @@ valgrind: default
 	valgrind ./solver /home/christian/Documents/C_Projects/Sudoku_Solver/Puzzles/test1.txt
 
 testPossibilities: Tests/testPossibilities.c solver.c
-	$(CC) -o Tests/testPossibilities Tests/testPossibilities.c $(INCLUDE)
+	$(CC) -o Tests/testPossibilities Tests/testPossibilities.c $(INCLUDE); ./Tests/testPossibilities
 
 clean:
 	rm solver
