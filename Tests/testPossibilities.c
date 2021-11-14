@@ -98,7 +98,7 @@ int main(int argv, char** argc){
     assert(p->possibilities[8][5] == (short)0);
     assert(p->possibilities[8][6] == (short)0xFE2A);
     assert(p->possibilities[8][7] == (short)0xFE30);
-    // assert(p->possibilities[8][8] == (short)0xFF12);
+    assert(p->possibilities[8][8] == (short)0xFF12);
     
 
     cleanUp(fp, p);
