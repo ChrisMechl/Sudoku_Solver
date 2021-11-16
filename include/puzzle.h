@@ -11,8 +11,15 @@
 
 typedef struct Puzzle{
     int** array;
-    int remainingNums[9];
-    short** possibilities;
+
+    /* Array of ints where index 0 represents the total remaining empty 
+    spaces in the puzzle and the 1-9 indexes represent the remaining empty
+    spaces for that number */
+    int remainingNums[10];
+
+    /* 2x2 array of shorts where the 9 least significant bits
+    represent the 1-9 possible entries in the sudoku puzzle */
+    short** possibilities; 
 }Puzzle;
 
 Puzzle* instantiatePuzzle();
