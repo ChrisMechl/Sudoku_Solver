@@ -10,10 +10,22 @@ int main(int argc, char** argv){
     }
 
     bool steps = false;
+    bool timer = false;
 
     if(argc == 3){
         if(strcmp(argv[2], "-s") == 0){
             steps = true;
+        }
+        else if(strcmp(argv[2], "-t") == 0){
+            timer = true;
+        }
+    }
+    if(argc == 4){
+        if(strcmp(argv[3], "-s") == 0){
+            steps = true;
+        }
+        else if(strcmp(argv[3], "-t") == 0){
+            timer = true;
         }
     }
 
@@ -22,6 +34,8 @@ int main(int argc, char** argv){
         fprintf(stderr, "Invalid file location\n");
         return EXIT_FAILURE;
     }
+
+    clock_t begin = clock();
 
     Puzzle* p = instantiatePuzzle(steps);
     
@@ -37,6 +51,10 @@ int main(int argc, char** argv){
 
     solve(p);
 
+    clock_t end = clock();
+    if(timer){
+        printf("Time spent solving %f\n", (double)(end - begin) / CLOCKS_PER_SEC);
+    }
     cleanUp(fp, p);
 
     return EXIT_SUCCESS;
