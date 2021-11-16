@@ -26,7 +26,7 @@ testPossibilities: Tests/testPossibilities.c solver.c
 	$(CC) -o build/testPossibilities Tests/testPossibilities.c $(INCLUDE); ./build/testPossibilities
 
 clean:
-	rm build/*;
+	rm -f build/time.txt;
 
 ifdef LOOPS
 loop: default clean
