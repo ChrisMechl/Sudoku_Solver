@@ -3,7 +3,7 @@
 #include "../solver.c"
 
 int main(int argv, char** argc){
-    Puzzle* p = instantiatePuzzle();
+    Puzzle* p = instantiatePuzzle(true);
     FILE* fp = fopen("/home/christian/Documents/C_Projects/Sudoku_Solver/Puzzles/test1.txt", "r");
 
     assert(getPuzzle(fp, p) != -1);

@@ -91,6 +91,7 @@ void solve(Puzzle* p){
                 }
                 p->possibilities[i][j] = compareRow(p, p->possibilities[i][j], i);
                 p->possibilities[i][j] = compareCol(p, p->possibilities[i][j], j);
+                p->possibilities[i][j] = compare3x3(p, p->possibilities[i][j], i, j);
                 checkPossibilities(p);
             }
         }
@@ -125,7 +126,19 @@ short compareCol(Puzzle* p, short possibilities, int col){
         if(p->array[i][col] == 0){
             continue;
         }
-       possibilities &= ~(1 << (p->array[i][col] - 1));
+        possibilities &= ~(1 << (p->array[i][col] - 1));
+    }
+    return possibilities;
+}
+
+short compare3x3(Puzzle* p, short possibilities, int row, int col){
+    for(int i = (row / 3) * 3; i < ((row / 3) * 3) + 3; i++){
+        for(int j = (col / 3) * 3; j < ((col / 3) * 3) + 3; j++){
+            if(p->array[i][j] == 0){
+                continue;
+            }
+            possibilities &= ~(1 << (p->array[i][j] - 1));
+        }
     }
     return possibilities;
 }
