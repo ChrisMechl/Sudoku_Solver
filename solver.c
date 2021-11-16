@@ -1,6 +1,6 @@
 #include "include/puzzle.h"
 
-Puzzle* instantiatePuzzle(){
+Puzzle* instantiatePuzzle(bool steps){
     /* Create Puzzle */
     Puzzle* p = malloc(sizeof(Puzzle));
 
@@ -29,6 +29,8 @@ Puzzle* instantiatePuzzle(){
     for(int i = 1; i < 10; i++){
         p->remainingNums[i] = 9;
     }
+
+    p->printSteps = steps;
 
     return p;
 }
@@ -93,6 +95,9 @@ void solve(Puzzle* p){
             }
         }
     }
+
+    printf("\nPuzzle Solution\n");
+    ppPuzzle(p);
 }
 
 /* Accepts the puzzle, a single short representing to the 
@@ -139,63 +144,81 @@ void checkPossibilities(Puzzle* p){
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[1]--;
-                    ppPuzzle(p);
+                    if(p->printSteps){
+                        ppPuzzle(p);
+                    }
                     break;
                 case (short)0xFE02:
                     p->array[i][j] = 2;
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[2]--;
-                    ppPuzzle(p);
+                    if(p->printSteps){
+                        ppPuzzle(p);
+                    }
                     break;
                 case (short)0xFE04:
                     p->array[i][j] = 3;
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[3]--;
-                    ppPuzzle(p);
+                    if(p->printSteps){
+                        ppPuzzle(p);
+                    }
                     break;
                 case (short)0xFE08:
                     p->array[i][j] = 4;
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[4]--;
-                    ppPuzzle(p);
+                    if(p->printSteps){
+                        ppPuzzle(p);
+                    }
                     break;
                 case (short)0xFE10:
                     p->array[i][j] = 5;
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[5]--;
-                    ppPuzzle(p);
+                    if(p->printSteps){
+                        ppPuzzle(p);
+                    }
                     break;
                 case (short)0xFE20:
                     p->array[i][j] = 6;
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[6]--;
-                    ppPuzzle(p);
+                    if(p->printSteps){
+                        ppPuzzle(p);
+                    }
                     break;
                 case (short)0xFE40:
                     p->array[i][j] = 7;
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[7]--;
-                    ppPuzzle(p);
+                    if(p->printSteps){
+                        ppPuzzle(p);
+                    }
                     break;
                 case (short)0xFE80:
                     p->array[i][j] = 8;
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[8]--;
-                    ppPuzzle(p);
+                    if(p->printSteps){
+                        ppPuzzle(p);
+                    }
                     break;
                 case (short)0xFF00:
                     p->array[i][j] = 9;
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[9]--;
-                    ppPuzzle(p);
+                    if(p->printSteps){
+                        ppPuzzle(p);
+                    }
                     break;
                 default:
                     break;
@@ -209,7 +232,12 @@ void printPuzzle(Puzzle* p){
     for(int i = 0; i < ROW; i++){
         printf("\n");
         for(int j = 0; j < COL; j++){
-            printf("%d", p->array[i][j]);
+            if(p->array[i][j] == 0){
+                printf("_");
+            }
+            else{
+                printf("%d", p->array[i][j]);
+            }
         }
     }
     printf("\n");
@@ -226,7 +254,14 @@ void ppPuzzle(Puzzle* p){
             if(j % 3 == 0){
                 printf("|");
             }
-            printf("%d", p->array[i][j]);
+
+            if(p->array[i][j] == 0){
+                printf("_");
+            }
+            else{
+                printf("%d", p->array[i][j]);
+            }
+
             if(j == COL - 1){
                 printf("|");
             }

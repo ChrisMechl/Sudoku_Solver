@@ -4,9 +4,17 @@ int main(int argc, char** argv){
     int pid = getpid();
     // printf("%d\n", pid);
 
-    if(argc != 2){
-        fprintf(stderr, "Invalid arguments: Please provide soduko file \n");
+    if(argc != 2 && argc != 3){
+        fprintf(stderr, "Invalid arguments: Please provide sudoku file location and -s flag if you wish to see steps\n");
         return EXIT_FAILURE;
+    }
+
+    bool steps = false;
+
+    if(argc == 3){
+        if(strcmp(argv[2], "-s") == 0){
+            steps = true;
+        }
     }
 
     FILE* fp = fopen(argv[1], "r");
@@ -15,7 +23,7 @@ int main(int argc, char** argv){
         return EXIT_FAILURE;
     }
 
-    Puzzle* p = instantiatePuzzle();
+    Puzzle* p = instantiatePuzzle(steps);
     
     /* Fill matrix */
     if(getPuzzle(fp, p) == -1){
@@ -24,6 +32,7 @@ int main(int argc, char** argv){
         return EXIT_FAILURE;
     }
 
+    printf("\nStarting Puzzle\n");
     ppPuzzle(p);
 
     solve(p);

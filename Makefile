@@ -12,6 +12,9 @@ debug: solver.c
 run: default
 	./solver /home/christian/Documents/C_Projects/Sudoku_Solver/Puzzles/test1.txt
 
+runSteps: default
+	./solver /home/christian/Documents/C_Projects/Sudoku_Solver/Puzzles/test1.txt -s
+
 valgrind: default
 	valgrind ./solver /home/christian/Documents/C_Projects/Sudoku_Solver/Puzzles/test1.txt
 

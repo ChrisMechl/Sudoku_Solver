@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <stdbool.h>
 
 
 #define ROW 9
@@ -20,13 +21,16 @@ typedef struct Puzzle{
     /* 2x2 array of shorts where the 9 least significant bits
     represent the 1-9 possible entries in the sudoku puzzle */
     short** possibilities; 
+
+    bool printSteps;
 }Puzzle;
 
-Puzzle* instantiatePuzzle();
+Puzzle* instantiatePuzzle(bool steps);
 void cleanUp(FILE* fp, Puzzle* p);
 int getPuzzle(FILE* fp, Puzzle* p);
 void solve(Puzzle* p);
 short compareRow(Puzzle* p, short possibilities, int row);
 short compareCol(Puzzle* p, short possibilities, int col);
+void checkPossibilities(Puzzle* p);
 void printPuzzle(Puzzle* p);
 void ppPuzzle(Puzzle* p);
