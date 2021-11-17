@@ -92,9 +92,11 @@ void solve(Puzzle* p){
                 p->possibilities[i][j] = compareRow(p, p->possibilities[i][j], i);
                 p->possibilities[i][j] = compareCol(p, p->possibilities[i][j], j);
                 p->possibilities[i][j] = compare3x3(p, p->possibilities[i][j], i, j);
-                checkPossibilities(p);
+                
             }
+            
         }
+        checkPossibilities(p);
     }
 
     printf("\nPuzzle Solution\n");

@@ -3,7 +3,8 @@ CC=gcc
 DEBUGFLAGS=-g
 CFLAGS=
 INCLUDE=include/puzzle.h
-TESTS=Number of tests: 
+PUZZLES=/home/christian/Documents/C_Projects/Sudoku_Solver/Puzzles/
+SOLVER=./build/solver
 
 .PHONY: average
 
@@ -13,17 +14,29 @@ default: solver.c main.c
 debug: solver.c
 	$(CC) -o build/solver main.c $(INCLUDE) $(DEBUGFLAGS)
 
-run: default
-	./build/solver /home/christian/Documents/C_Projects/Sudoku_Solver/Puzzles/test1.txt
+run1: default
+	$(SOLVER) $(PUZZLES)test1.txt
 
-runSteps: default
-	./build/solver /home/christian/Documents/C_Projects/Sudoku_Solver/Puzzles/test1.txt -s
+run1Steps: default
+	$(SOLVER) $(PUZZLES)test1.txt -s
 
-runTime: default
-	./build/solver /home/christian/Documents/C_Projects/Sudoku_Solver/Puzzles/test1.txt -t
+run1Time: default
+	$(SOLVER) $(PUZZLES)test1.txt -t
+
+run2: default
+	$(SOLVER) $(PUZZLES)test2.txt
+
+run2Steps: default
+	$(SOLVER) $(PUZZLES)test2.txt -s
+
+run2Time: default
+	$(SOLVER) $(PUZZLES)test2.txt -t
+
+
+
 
 valgrind: default
-	valgrind ./build/solver /home/christian/Documents/C_Projects/Sudoku_Solver/Puzzles/test1.txt
+	valgrind $(SOLVER) $(PUZZLES)test1.txt
 
 testPossibilities: Tests/testPossibilities.c solver.c
 	$(CC) -o build/testPossibilities Tests/testPossibilities.c $(INCLUDE); ./build/testPossibilities
@@ -34,13 +47,10 @@ clean:
 ifdef LOOPS
 loop: default clean
 	SUM=0; echo Average for ${LOOPS} loops: > build/time.txt;
-	for ((i=1; i <= ${LOOPS}; ++i)) do make runTime | grep -oP "\d+\.{1}\d+" >> build/temp.txt; done; 
-	awk '{ sum += $$1; count+=1 } END { result=sum/count; print result }' build/temp.txt >> build/time.txt;
+	for ((i=1; i <= ${LOOPS}; ++i)) do make run1Time | grep -oP "\d+\.{1}\d+" >> build/temp.txt; done; 
+	awk '{ sum += $$1; count+=1 } END { result=sum/count; printf "%.08f", result }' build/temp.txt >> build/time.txt;
 	rm -f build/temp.txt;
 endif
-
-test:
-	awk '{ sum += $$1 } END { print sum }' /home/christian/Documents/C_Projects/Sudoku_Solver/build/time.txt
 
 grepTime: default
 	make runTime | grep -oP "\d+\.{1}\d+" >> build/time.txt
