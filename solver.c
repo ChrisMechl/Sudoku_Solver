@@ -77,6 +77,10 @@ int getPuzzle(FILE* fp, Puzzle* p){
                 int num = cur - 48;
                 p->array[i][j] = num;
                 p->remainingNums[num]--;
+                p->possibilities[i][j] = 0;
+                clearRowPossibility(p, i, num - 1);
+                clearColPossibility(p, j, num - 1);
+                clear3x3Possibility(p, i, j, num - 1);
             }
         }
     }
@@ -84,6 +88,7 @@ int getPuzzle(FILE* fp, Puzzle* p){
 
 void solve(Puzzle* p){
     while(p->remainingNums[0] > 0){
+        int col = -1;
         for(int i = 0; i < ROW; i++){
             for(int j = 0; j < COL; j++){
                 /* if a number is already there, possibilities = 0 */
@@ -96,7 +101,9 @@ void solve(Puzzle* p){
                 p->possibilities[i][j] = compare3x3(p, p->possibilities[i][j], i, j);
                 
             }
+            col++;
             checkRow(p, i);
+            checkCol(p, col);
             
         }
         checkPossibilities(p);
@@ -184,9 +191,51 @@ void checkRow(Puzzle* p, int row){
             if(p->printSteps){
                 ppPuzzle(p);
             }
-            clearRowPossibility(p, row, i);
             clearColPossibility(p, possibleIdx, i);
             clear3x3Possibility(p, row, possibleIdx, i);
+            possibleIdx = -1;
+        }
+    }
+}
+
+/*Checks all numbers' (1-9) availability in the current col to see
+if there's a single location that any number can legally reside in */
+void checkCol(Puzzle* p, int col){
+    int possibleIdx = -1;
+    /* Go through 1-9 */
+    for(int i = 0; i < 9; i++){
+        /* Go through each row in the col */
+        for(int j = 0; j < ROW; j++){
+            if(p->possibilities[j][col] == 0){
+                continue;
+            }
+            else if((p->possibilities[j][col] & ands[i]) != 0){
+                /* If multiple indexes can contain the current checked value,
+                we won't be able to find a single spot for that number in
+                this col. Reset it and go to the next number */
+                if(possibleIdx > -1){
+                    possibleIdx = -1;
+                    break;
+                }
+                else{
+                    possibleIdx = j;
+                }
+            }
+        }
+        /* If we make it here, only one index can hold the current i value
+        so we set it in array, clear the possibilities for that index,
+        and clear that bit from all other possibilities in the row, col,
+        and 3x3 */
+        if(possibleIdx > -1){
+            p->array[possibleIdx][col] = i + 1;
+            p->possibilities[possibleIdx][col] = 0;
+            p->remainingNums[0]--;
+            p->remainingNums[i + 1]--;
+            if(p->printSteps){
+                ppPuzzle(p);
+            }
+            clearRowPossibility(p, possibleIdx, i);
+            clear3x3Possibility(p, possibleIdx, col, i);
             possibleIdx = -1;
         }
     }

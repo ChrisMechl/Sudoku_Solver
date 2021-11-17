@@ -43,6 +43,7 @@ short compareRow(Puzzle* p, short possibilities, int row);
 short compareCol(Puzzle* p, short possibilities, int col);
 short compare3x3(Puzzle* p, short possibilities, int row, int col);
 void checkRow(Puzzle* p, int row);
+void checkCol(Puzzle* p, int col);
 void clearRowPossibility(Puzzle* p, int row, int i);
 void clearColPossibility(Puzzle* p, int col, int i);
 void clear3x3Possibility(Puzzle* p, int row, int col, int i);
