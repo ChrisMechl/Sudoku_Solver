@@ -1,5 +1,7 @@
 #include "include/puzzle.h"
 
+short ands[9] = {ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE};
+
 Puzzle* instantiatePuzzle(bool steps){
     /* Create Puzzle */
     Puzzle* p = malloc(sizeof(Puzzle));
@@ -94,6 +96,7 @@ void solve(Puzzle* p){
                 p->possibilities[i][j] = compare3x3(p, p->possibilities[i][j], i, j);
                 
             }
+            checkRow(p, i);
             
         }
         checkPossibilities(p);
@@ -143,6 +146,50 @@ short compare3x3(Puzzle* p, short possibilities, int row, int col){
         }
     }
     return possibilities;
+}
+
+/*Checks all numbers' (1-9) availability in the current row to see
+if there's a single location that any number can legally reside in */
+void checkRow(Puzzle* p, int row){
+    int possibleIdx = -1;
+    /* Go through 1-9 */
+    for(int i = 0; i < 9; i++){
+        /* Go through each col in the row */
+        for(int j = 0; j < COL; j++){
+            if(p->possibilities[row][j] == 0){
+                continue;
+            }
+            else if((p->possibilities[row][j] & ands[i]) != 0){
+                /* If multiple indexes can contain the current checked value,
+                we won't be able to find a single spot for that number in
+                this row. Reset it and go to the next number */
+                if(possibleIdx > -1){
+                    possibleIdx = -1;
+                    break;
+                }
+                else{
+                    possibleIdx = j;
+                }
+            }
+        }
+        /* If we make it here, only one index can hold the current i value
+        so we set it in array, clear the possibilities for that index,
+        and clear that bit from all other possibilities in the row, col,
+        and 3x3 */
+        if(possibleIdx > -1){
+            p->array[row][possibleIdx] = i + 1;
+            p->possibilities[row][possibleIdx] = 0;
+            p->remainingNums[0]--;
+            p->remainingNums[i + 1]--;
+            if(p->printSteps){
+                ppPuzzle(p);
+            }
+            clearRowPossibility(p, row, i);
+            clearColPossibility(p, possibleIdx, i);
+            clear3x3Possibility(p, row, possibleIdx, i);
+            possibleIdx = -1;
+        }
+    }
 }
 
 /* Goes through possibilities array and fills indexes that only have 
@@ -238,6 +285,32 @@ void checkPossibilities(Puzzle* p){
                 default:
                     break;
             }
+        }
+    }
+}
+
+/* Clears the row defined in row of the possibility referenced in the ands
+array by index i */
+void clearRowPossibility(Puzzle* p, int row, int i){
+    for(int j = 0; j < COL; j++){
+        p->possibilities[row][j] = p->possibilities[row][j] & ~(ands[i]);
+    }
+}
+
+/* Clears the row defined in row of the possibility referenced in the ands
+array by index i */
+void clearColPossibility(Puzzle* p, int col, int i){
+    for(int j = 0; j < ROW; j++){
+        p->possibilities[j][col] = p->possibilities[j][col] & ~(ands[i]);
+    }
+}
+
+/* Clears the 3x3 defined by row and col of the possibility referenced in the ands
+array by index i */
+void clear3x3Possibility(Puzzle* p, int row, int col, int i){
+    for(int k = (row / 3) * 3; k < ((row / 3) * 3) + 3; k++){
+        for(int j = (col / 3) * 3; j < ((col / 3) * 3) + 3; j++){
+            p->possibilities[k][j] = p->possibilities[k][j] & ~(ands[i]);
         }
     }
 }

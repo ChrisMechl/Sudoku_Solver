@@ -32,9 +32,6 @@ run2Steps: default
 run2Time: default
 	$(SOLVER) $(PUZZLES)test2.txt -t
 
-
-
-
 valgrind: default
 	valgrind $(SOLVER) $(PUZZLES)test1.txt
 
