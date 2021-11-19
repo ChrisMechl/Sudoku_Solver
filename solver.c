@@ -113,6 +113,7 @@ void solve(Puzzle* p){
             }
         }
         checkPossibilities(p);
+        // printPossibilities(p);
     }
 
     printf("\nPuzzle Solution\n");
@@ -486,4 +487,25 @@ void ppPuzzle(Puzzle* p){
         }
     }
     printf("\n%s\n", HORZ_BAR);
+}
+
+
+void printPossibilities(Puzzle* p){
+    for(int i = 0; i < ROW; i++){
+        printf("\n");
+        if(i % 3 == 0){
+            printf("%s\n", HORZ_BAR);
+        }
+        for(int j = 0; j < COL; j++){
+            if(j % 3 == 0){
+                printf("|");
+            }
+
+            printf("%d", p->possibilities[i][j]);
+
+            if(j == COL -1){
+                printf("|");
+            }
+        }
+    }
 }

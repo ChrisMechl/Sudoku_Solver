@@ -51,3 +51,4 @@ void clear3x3Possibility(Puzzle* p, int row, int col, int i);
 void checkPossibilities(Puzzle* p);
 void printPuzzle(Puzzle* p);
 void ppPuzzle(Puzzle* p);
+void printPossibilities(Puzzle* p);
