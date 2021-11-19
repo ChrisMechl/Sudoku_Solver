@@ -1,5 +1,5 @@
 #include "include/puzzle.h"
-
+//TODO hard getting wrong answers
 short ands[9] = {ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE};
 
 Puzzle* instantiatePuzzle(bool steps){
@@ -78,6 +78,9 @@ int getPuzzle(FILE* fp, Puzzle* p){
                 p->array[i][j] = num;
                 p->remainingNums[num]--;
                 p->possibilities[i][j] = 0;
+                /* Remove possibilities for num - 1 because the functions were 
+                designed to take index values for the ands array which starts at
+                zero */
                 clearRowPossibility(p, i, num - 1);
                 clearColPossibility(p, j, num - 1);
                 clear3x3Possibility(p, i, j, num - 1);
@@ -87,6 +90,7 @@ int getPuzzle(FILE* fp, Puzzle* p){
 }
 
 void solve(Puzzle* p){
+    checkPossibilities(p);
     while(p->remainingNums[0] > 0){
         int col = -1;
         for(int i = 0; i < ROW; i++){
@@ -104,7 +108,9 @@ void solve(Puzzle* p){
             col++;
             checkRow(p, i);
             checkCol(p, col);
-            
+            if(i == 2 || i == 6 || i == 8){
+                check3x3(p, i, col);
+            }
         }
         checkPossibilities(p);
     }
@@ -241,6 +247,53 @@ void checkCol(Puzzle* p, int col){
     }
 }
 
+void check3x3(Puzzle* p, int row, int col){
+    int possibleXIdx = -1;
+    int possibleYIdx = -1;
+    for(int k = 0; k < 9; k++){
+        for(int i = (row / 3) * 3; i < ((row / 3) * 3) + 3; i++){
+            for(int j = (col / 3) * 3; j < ((col / 3) * 3) + 3; j++){
+                if(p->possibilities[i][j] == 0){
+                    continue;
+                }
+                else if((p->possibilities[i][j] & ands[k]) != 0){
+                    /* If multiple indexes can contain the current checked value,
+                    we won't be able to find a single spot for that number in
+                    this col. Reset it and go to the next number */
+                    if(possibleXIdx > -1){
+                        possibleXIdx = -1;
+                        possibleYIdx = -1;
+                        i = 99;
+                        j = 99;
+                        break;
+                    }
+                    else{
+                        possibleXIdx = i;
+                        possibleYIdx = j;
+                    }
+                }
+            }
+        }
+        /* If we make it here, only one index can hold the current i value
+        so we set it in array, clear the possibilities for that index,
+        and clear that bit from all other possibilities in the row, col,
+        and 3x3 */
+        if(possibleXIdx > -1){
+            p->array[possibleXIdx][possibleYIdx] = k + 1;
+            p->possibilities[possibleXIdx][possibleYIdx] = 0;
+            p->remainingNums[0]--;
+            p->remainingNums[k + 1]--;
+            if(p->printSteps){
+                ppPuzzle(p);
+            }
+            clearRowPossibility(p, possibleXIdx, k);
+            clearColPossibility(p, possibleYIdx, k);
+            possibleXIdx = -1;
+            possibleYIdx = -1;
+        }
+    }
+}
+
 /* Goes through possibilities array and fills indexes that only have 
 one possibility in the puzzle array */
 void checkPossibilities(Puzzle* p){
@@ -255,6 +308,9 @@ void checkPossibilities(Puzzle* p){
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[1]--;
+                    clearRowPossibility(p, i, 0);
+                    clearColPossibility(p, j, 0);
+                    clear3x3Possibility(p, i, j, 0);
                     if(p->printSteps){
                         ppPuzzle(p);
                     }
@@ -264,6 +320,9 @@ void checkPossibilities(Puzzle* p){
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[2]--;
+                    clearRowPossibility(p, i, 1);
+                    clearColPossibility(p, j, 1);
+                    clear3x3Possibility(p, i, j, 1);
                     if(p->printSteps){
                         ppPuzzle(p);
                     }
@@ -273,6 +332,9 @@ void checkPossibilities(Puzzle* p){
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[3]--;
+                    clearRowPossibility(p, i, 2);
+                    clearColPossibility(p, j, 2);
+                    clear3x3Possibility(p, i, j, 2);
                     if(p->printSteps){
                         ppPuzzle(p);
                     }
@@ -282,6 +344,9 @@ void checkPossibilities(Puzzle* p){
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[4]--;
+                    clearRowPossibility(p, i, 3);
+                    clearColPossibility(p, j, 3);
+                    clear3x3Possibility(p, i, j, 3);
                     if(p->printSteps){
                         ppPuzzle(p);
                     }
@@ -291,6 +356,9 @@ void checkPossibilities(Puzzle* p){
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[5]--;
+                    clearRowPossibility(p, i, 4);
+                    clearColPossibility(p, j, 4);
+                    clear3x3Possibility(p, i, j, 4);
                     if(p->printSteps){
                         ppPuzzle(p);
                     }
@@ -300,6 +368,9 @@ void checkPossibilities(Puzzle* p){
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[6]--;
+                    clearRowPossibility(p, i, 5);
+                    clearColPossibility(p, j, 5);
+                    clear3x3Possibility(p, i, j, 5);
                     if(p->printSteps){
                         ppPuzzle(p);
                     }
@@ -309,6 +380,9 @@ void checkPossibilities(Puzzle* p){
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[7]--;
+                    clearRowPossibility(p, i, 6);
+                    clearColPossibility(p, j, 6);
+                    clear3x3Possibility(p, i, j, 6);
                     if(p->printSteps){
                         ppPuzzle(p);
                     }
@@ -318,6 +392,9 @@ void checkPossibilities(Puzzle* p){
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[8]--;
+                    clearRowPossibility(p, i, 7);
+                    clearColPossibility(p, j, 7);
+                    clear3x3Possibility(p, i, j, 7);
                     if(p->printSteps){
                         ppPuzzle(p);
                     }
@@ -327,6 +404,9 @@ void checkPossibilities(Puzzle* p){
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[9]--;
+                    clearRowPossibility(p, i, 8);
+                    clearColPossibility(p, j, 8);
+                    clear3x3Possibility(p, i, j, 8);
                     if(p->printSteps){
                         ppPuzzle(p);
                     }
@@ -382,6 +462,7 @@ void printPuzzle(Puzzle* p){
 
 /* Prints puzzle with bars to format it like a written puzzle */
 void ppPuzzle(Puzzle* p){
+    printf("\n%d", p->remainingNums[0]);
     for(int i = 0; i < ROW; i++){
         printf("\n");
         if(i % 3 == 0){
