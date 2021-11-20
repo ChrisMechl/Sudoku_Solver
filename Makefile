@@ -34,7 +34,7 @@ runMediumSteps: default
 	$(SOLVER) $(PUZZLES)$(MED)test$(PUZ).txt -s
 
 runMediumTime: default
-	$(SOLVER) $(PUZZLES)$(MED)test$(PUZ).txt -t
+	$(SOLVER) $(PUZZLES)$(HARD)test$(PUZ).txt -t
 
 runHard: default
 	$(SOLVER) $(PUZZLES)$(HARD)test$(PUZ).txt
@@ -47,7 +47,7 @@ runHardTime: default
 
 
 valgrind: default
-	valgrind $(SOLVER) $(PUZZLES)$(EASY)test1.txt
+	valgrind $(SOLVER) $(PUZZLES)$(HARD)test1.txt
 
 testPossibilities: Tests/testPossibilities.c solver.c
 	$(CC) -o build/testPossibilities Tests/testPossibilities.c $(INCLUDE); ./build/testPossibilities

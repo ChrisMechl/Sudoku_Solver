@@ -33,8 +33,52 @@ Puzzle* instantiatePuzzle(bool steps){
     }
 
     p->printSteps = steps;
+    p->iterations = 0;
+    p->guess = false;
+    p->g = 0;
 
     return p;
+}
+
+void instantiateGuess(Puzzle* p){
+    /* If there is already a guess, remove it */
+    if(p->g != 0){
+        for(int i = 0; i < ROW; i++){
+            free(p->g->array[i]);
+            free(p->g->possibilities);
+        }
+        free(p->g);
+    }
+
+    /* Create guess puzzle */
+    Guess* g = malloc(sizeof(Guess));
+    /* Create puzzle array */
+    int** array = malloc(sizeof(int*) * COL);
+    /* Each column gets ROW number of ints */
+    for(int i = 0; i < ROW; i++){
+        array[i] = malloc(sizeof(int) * ROW);
+        memset(array[i], 0, (ROW * sizeof(int)));
+    }
+    /* Create possibilities array */
+    short** possibilities = malloc(sizeof(short* ) * ROW);
+    /* Each column gets ROW number of shorts */
+    for(int i = 0; i < ROW; i++){
+        possibilities[i] = malloc(sizeof(short) * ROW);
+        memset(possibilities[i], 0xff, (ROW * sizeof(short)));
+    }
+
+    /* Attach to Puzzle struct */
+    g->array = array;
+    g->possibilities = possibilities;
+
+    /* Assign remaining nums to default values */
+    g->remainingNums[0] = 0;
+    for(int i = 1; i < 10; i++){
+        g->remainingNums[i] = 9;
+    }
+
+    /* Attach guess to p */
+    p->g = g;
 }
 
 void cleanUp(FILE* fp, Puzzle* p){
@@ -47,6 +91,15 @@ void cleanUp(FILE* fp, Puzzle* p){
         free(p->possibilities[i]);
     }
 
+    if(p->g != 0){
+        for(int i = 0; i < ROW; i++){
+            free(p->g->array[i]);
+            free(p->g->possibilities[i]);
+        }
+        free(p->g->array);
+        free(p->g->possibilities);
+        free(p->g);
+    }
 
     free(p->array);
     free(p->possibilities);
@@ -92,6 +145,23 @@ int getPuzzle(FILE* fp, Puzzle* p){
 void solve(Puzzle* p){
     checkPossibilities(p);
     while(p->remainingNums[0] > 0){
+        /* If we have gone through the puzzle and made no changes for an
+        entire iteration, time to make a guess */
+        if(p->iterations > 0 && p->g == 0){
+            instantiateGuess(p);
+            findGuess(p);
+            copyPuzzleToGuess(p);
+            makeGuess(p);
+        }
+        /* If we have gone through the puzzle and made no changes for an
+        entire iteration AFTER already making a guess, revert to old puzzle
+        pre-guess and update possibilities because the guessed value is no
+        longer considered legal. We proved it can't exist in the place we
+        guessed it to be */
+        else if(p->iterations > 0 && p->g != 0){
+            //TODO
+        }
+        p->iterations++;
         int col = -1;
         for(int i = 0; i < ROW; i++){
             for(int j = 0; j < COL; j++){
@@ -195,6 +265,7 @@ void checkRow(Puzzle* p, int row){
             p->possibilities[row][possibleIdx] = 0;
             p->remainingNums[0]--;
             p->remainingNums[i + 1]--;
+            p->iterations = 0;
             if(p->printSteps){
                 ppPuzzle(p);
             }
@@ -238,6 +309,7 @@ void checkCol(Puzzle* p, int col){
             p->possibilities[possibleIdx][col] = 0;
             p->remainingNums[0]--;
             p->remainingNums[i + 1]--;
+            p->iterations = 0;
             if(p->printSteps){
                 ppPuzzle(p);
             }
@@ -248,6 +320,8 @@ void checkCol(Puzzle* p, int col){
     }
 }
 
+/*Checks all numbers' (1-9) availability in the current 3x3 to see
+if there's a single location that any number can legally reside in */
 void check3x3(Puzzle* p, int row, int col){
     int possibleXIdx = -1;
     int possibleYIdx = -1;
@@ -284,6 +358,7 @@ void check3x3(Puzzle* p, int row, int col){
             p->possibilities[possibleXIdx][possibleYIdx] = 0;
             p->remainingNums[0]--;
             p->remainingNums[k + 1]--;
+            p->iterations = 0;
             if(p->printSteps){
                 ppPuzzle(p);
             }
@@ -292,6 +367,108 @@ void check3x3(Puzzle* p, int row, int col){
             possibleXIdx = -1;
             possibleYIdx = -1;
         }
+    }
+}
+
+void findGuess(Puzzle* p){
+    /* Starts looking for possibilities with only 2 possibilities. 
+    If it can't find a possibility with only 2 possibilities, increase 
+    the number of possibilities to look for until we reach 9 */
+    for(int poss = 2; poss < 10; poss++){
+        for(int i = 0; i < ROW; i++){
+            for(int j = 0; j < COL; j++){
+                if(p->possibilities[i][j] == 0){
+                    continue;
+                }
+                if(getNumberOfPossibilities(p->possibilities[i][j]) == poss){
+                    p->g->x = i;
+                    p->g->y = j;
+                    p->g->xyPossibilities = p->possibilities[i][j];
+                    poss = 99;
+                    i = 99;
+                    j = 99;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+
+
+void makeGuess(Puzzle* p){
+    int guess = -1;
+    /* Set number in array to guess */
+    guess = getNextPossibility(p->g->xyPossibilities);
+    p->array[p->g->x][p->g->y] = guess;
+    /* Set possibilities at newly placed number to zero */
+    p->possibilities[p->g->x][p->g->y] = 0;
+    /* Clear possibilities of row, col, 3x3 for the newly placed number.
+    Must use guess - 1 to use correct index in ands array */
+    clearRowPossibility(p, p->g->x, guess - 1);
+    clearColPossibility(p, p->g->y, guess - 1);
+    clear3x3Possibility(p, p->g->x, p->g->y, guess -1);
+    /* Update remainingNums */
+    p->remainingNums[0]--;
+    p->remainingNums[guess]--;
+
+    p->iterations = 0;
+
+    if(p->printSteps){
+        printf("Making guess of %d at i = %d, j = %d\n", guess, p->g->x, p->g->y);
+        ppPuzzle(p);
+    }
+}
+
+/* For a given possibility, return the number of possibilities
+by bit shifting 9 times and counting the 1's in the lsb */
+int getNumberOfPossibilities(short possibility){
+    int count = 0;
+    for(int k = 0; k < 9; k++){
+        if((possibility >> k) & 1 == 1){
+            count++;
+        }
+    }
+    return count;
+}
+
+/* Gets the next possible number from a possibility by bit
+shifting, then ANDing with 1 */
+int getNextPossibility(short possibility){
+    for(int i = 0; i < 9; i++){
+        if((possibility >> i) & 1 == 1){
+            return i + 1;
+        }
+    }
+}
+
+/* Copies data from Puzzle to Guess prior to making the guess
+in order to be able to revert back to the pre-guess state */
+void copyPuzzleToGuess(Puzzle* p){
+    for(int i = 0; i < ROW; i++){
+        for(int j = 0; j < COL; j++){
+            p->g->possibilities[i][j] = p->possibilities[i][j];
+            p->g->array[i][j] = p->array[i][j];
+        }
+    }
+
+    for(int i = 0; i < 10; i++){
+        p->g->remainingNums[i] = p->remainingNums[i];
+    }
+}
+
+/* Copies data from Guess to Puzzle after the guess has been made
+and found to be wrong. Reverts back to pre-guess state */
+void copyGuessToPuzzle(Puzzle* p){
+    for(int i = 0; i < ROW; i++){
+        for(int j = 0; j < COL; j++){
+            p->possibilities[i][j] = p->g->possibilities[i][j];
+            p->array[i][j] = p->g->array[i][j];
+        }
+    }
+
+    for(int i = 0; i < 10; i++){
+        p->remainingNums[i] = p->g->remainingNums[i];
     }
 }
 
@@ -309,6 +486,7 @@ void checkPossibilities(Puzzle* p){
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[1]--;
+                    p->iterations = 0;
                     clearRowPossibility(p, i, 0);
                     clearColPossibility(p, j, 0);
                     clear3x3Possibility(p, i, j, 0);
@@ -321,6 +499,7 @@ void checkPossibilities(Puzzle* p){
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[2]--;
+                    p->iterations = 0;
                     clearRowPossibility(p, i, 1);
                     clearColPossibility(p, j, 1);
                     clear3x3Possibility(p, i, j, 1);
@@ -333,6 +512,7 @@ void checkPossibilities(Puzzle* p){
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[3]--;
+                    p->iterations = 0;
                     clearRowPossibility(p, i, 2);
                     clearColPossibility(p, j, 2);
                     clear3x3Possibility(p, i, j, 2);
@@ -345,6 +525,7 @@ void checkPossibilities(Puzzle* p){
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[4]--;
+                    p->iterations = 0;
                     clearRowPossibility(p, i, 3);
                     clearColPossibility(p, j, 3);
                     clear3x3Possibility(p, i, j, 3);
@@ -357,6 +538,7 @@ void checkPossibilities(Puzzle* p){
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[5]--;
+                    p->iterations = 0;
                     clearRowPossibility(p, i, 4);
                     clearColPossibility(p, j, 4);
                     clear3x3Possibility(p, i, j, 4);
@@ -369,6 +551,7 @@ void checkPossibilities(Puzzle* p){
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[6]--;
+                    p->iterations = 0;
                     clearRowPossibility(p, i, 5);
                     clearColPossibility(p, j, 5);
                     clear3x3Possibility(p, i, j, 5);
@@ -381,6 +564,7 @@ void checkPossibilities(Puzzle* p){
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[7]--;
+                    p->iterations = 0;
                     clearRowPossibility(p, i, 6);
                     clearColPossibility(p, j, 6);
                     clear3x3Possibility(p, i, j, 6);
@@ -393,6 +577,7 @@ void checkPossibilities(Puzzle* p){
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[8]--;
+                    p->iterations = 0;
                     clearRowPossibility(p, i, 7);
                     clearColPossibility(p, j, 7);
                     clear3x3Possibility(p, i, j, 7);
@@ -405,6 +590,7 @@ void checkPossibilities(Puzzle* p){
                     p->possibilities[i][j] = 0;
                     p->remainingNums[0]--;
                     p->remainingNums[9]--;
+                    p->iterations = 0;
                     clearRowPossibility(p, i, 8);
                     clearColPossibility(p, j, 8);
                     clear3x3Possibility(p, i, j, 8);
