@@ -41,15 +41,6 @@ Puzzle* instantiatePuzzle(bool steps){
 }
 
 void instantiateGuess(Puzzle* p){
-    /* If there is already a guess, remove it */
-    if(p->g != 0){
-        for(int i = 0; i < ROW; i++){
-            free(p->g->array[i]);
-            free(p->g->possibilities);
-        }
-        free(p->g);
-    }
-
     /* Create guess puzzle */
     Guess* g = malloc(sizeof(Guess));
     /* Create puzzle array */
@@ -77,8 +68,35 @@ void instantiateGuess(Puzzle* p){
         g->remainingNums[i] = 9;
     }
 
-    /* Attach guess to p */
-    p->g = g;
+    /* Attach to end of list */
+    if(p->last != 0){
+        p->last->next = g;
+        g->prev = p->last;
+        g->next = 0;
+        p->last = g;
+    }
+    else{
+        p->first = g;
+        p->last = g;
+        g->prev = 0;
+        g->next = 0;
+    }
+}
+
+void removeLastGuess(Puzzle* p){
+    Guess* cur;
+    if(p->last != 0){
+        cur = p->last;
+        p->last = p->last->prev;
+        p->last->next = 0;
+        for(int i = 0; i < ROW; i++){
+            free(cur->array[i]);
+            free(cur->possibilities[i]);
+        }
+        free(cur->array);
+        free(cur->possibilities);
+        free(cur);
+    }
 }
 
 void cleanUp(FILE* fp, Puzzle* p){
@@ -159,7 +177,46 @@ void solve(Puzzle* p){
         longer considered legal. We proved it can't exist in the place we
         guessed it to be */
         else if(p->iterations > 0 && p->g != 0){
-            //TODO
+            /* Revert to pre-guess puzzle */
+            copyGuessToPuzzle(p);
+            short guess = getNextPossibility(p->g->xyPossibilities);
+            /* Remove possibility of guess from guessed spot */
+            p->possibilities[p->g->x][p->g->y] &= ~(ands[guess - 1]);
+            p->g->xyPossibilities &= ~(ands[guess - 1]);
+
+            /* If there's only one possibility left, fill it in and remove guess as 
+            it's no longer accurate */
+            if(getNumberOfPossibilities(p->g->xyPossibilities) == 1){
+                guess = getNextPossibility(p->g->xyPossibilities);
+                p->array[p->g->x][p->g->y] = guess;
+                /* Set possibilities at newly placed number to zero */
+                p->possibilities[p->g->x][p->g->y] = 0;
+                /* Clear possibilities of row, col, 3x3 for the newly placed number.
+                Must use guess - 1 to use correct index in ands array */
+                clearRowPossibility(p, p->g->x, guess - 1);
+                clearColPossibility(p, p->g->y, guess - 1);
+                clear3x3Possibility(p, p->g->x, p->g->y, guess -1);
+                /* Update remainingNums */
+                p->remainingNums[0]--;
+                p->remainingNums[guess]--;
+
+                p->iterations = 0;
+                
+
+                if(p->printSteps){
+                    printf("Previous guess was wrong, but only one possible number left of %d at i = %d, j = %d\n", guess, p->g->x, p->g->y);
+                    ppPuzzle(p);
+                }
+                removeLastGuess(p);
+                p->g = 0;
+            }
+            else{
+                /* Create new guess */
+                makeGuess(p);
+            }
+            
+
+
         }
         p->iterations++;
         int col = -1;
